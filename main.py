@@ -3,6 +3,7 @@ from discord.ext import commands
 import os
 import json
 import asyncio
+from utils.keep_alive import keep_alive  # Importation de la fonction pour garder le bot actif
 
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix="/", intents=intents)
@@ -20,7 +21,7 @@ async def load_cogs():
     for filename in os.listdir("./cogs"):
         if filename.endswith(".py"):
             cog_name = f"cogs.{filename[:-3]}"
-            if cog_name not in bot.extensions:  # Vérifie si le cog est déjà chargé
+            if cog_name not in bot.extensions:
                 try:
                     await bot.load_extension(cog_name)
                     print(f"Cog {filename} chargé.")
@@ -29,7 +30,6 @@ async def load_cogs():
             else:
                 print(f"Cog {filename} déjà chargé.")
 
-# Commande pour recharger les cogs
 @bot.command(name="reload")
 @commands.has_permissions(administrator=True)
 async def reload(ctx):
@@ -37,16 +37,14 @@ async def reload(ctx):
     await load_cogs()
     await ctx.send("Toutes les extensions ont été rechargées.")
 
-# Démarrage du bot
-async def main():
-    await load_cogs()
+# Démarrage du bot et démarrage de Flask pour le rendre actif
+def start_bot():
+    keep_alive()  # Garde le bot actif via Flask
     with open("config/config.json") as f:
         config = json.load(f)
     try:
-        await bot.start(config["token"])  # Token sécurisé dans config.json
+        bot.run(config["token"])  # Utilise la méthode bot.run pour démarrer le bot
     except Exception as e:
         print(f"Erreur lors du démarrage du bot : {e}")
-    finally:
-        await bot.close()
 
-asyncio.run(main())
+start_bot()  # Démarre le bot et le serveur Flask pour maintenir l'activité
