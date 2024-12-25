@@ -1,0 +1,5 @@
+{
+    "admin": ["Administrateur"],
+    "trusted_member": ["Membre de confiance"],
+    "club_manager": ["Gestionnaire de club"]
+}
